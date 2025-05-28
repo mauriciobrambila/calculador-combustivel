@@ -1,23 +1,23 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Image, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, ImageBackground, TouchableWithoutFeedback, 
+  Keyboard, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 
 export default function App() {
   const [gasolina, setGasolina] = useState('');
   const [alcool, setAlcool] = useState('');
   const [resposta, setResposta] = useState('');
   const [resultadoStyle, setResultadoStyle] = useState(styles.resultadoNeutro);
-
   const formatarNumero = (valor) => {
   const valorLimpo = valor.replace(/[^0-9.,]/g, '');
+
     return valorLimpo.replace(',', '.');
   };
 
   function calculoCombustivel() {
     const gasolinaNum = parseFloat(formatarNumero(gasolina)) || 0;
     const alcoolNum = parseFloat(formatarNumero(alcool)) || 0;
-   
     if (gasolinaNum === 0) return Infinity;
-      return alcoolNum / gasolinaNum;
+    return alcoolNum / gasolinaNum;
   }
 
   function combustivelViavel() {
@@ -28,7 +28,7 @@ export default function App() {
     }
 
     const resultado = calculoCombustivel();
-    
+
     if (isNaN(resultado)) {
       setResposta('Valores inválidos');
       setResultadoStyle(styles.resultadoNeutro);
@@ -45,109 +45,136 @@ export default function App() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.titulo}>Escolha de Combustível</Text>
-          <Text style={styles.subtitulo}>Compare os preços </Text>
-        </View>
+    <ImageBackground
+      source={require('./img/posto.jpg')}
+      style={styles.background}
+      imageStyle={{ opacity: 0.6 }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.inner}>
+              <View style={styles.header}>
+                <Text style={styles.titulo}>Escolha de Combustível </Text>
+                <Text style={styles.subtitulo}>Compare os preços  </Text>
+              </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>           Gasolina (R$):</Text>          
-          <TextInput              
-            style={styles.input}
-            placeholder='Ex: 5.75'
-            keyboardType='decimal-pad'
-            value={gasolina}
-            onChangeText={setGasolina}
-            onBlur={() => setGasolina(formatarNumero(gasolina))}
-          />            
-        </View>   
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>             Gasolina (R$):</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ex: 5.75"
+                  keyboardType="decimal-pad"
+                  value={gasolina}
+                  onChangeText={setGasolina}
+                  onBlur={() => setGasolina(formatarNumero(gasolina))}
+                />
+              </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>             Álcool (R$):</Text>          
-          <TextInput              
-            style={styles.input}
-            placeholder='Ex: 3.99'
-            keyboardType='decimal-pad'
-            value={alcool}
-            onChangeText={setAlcool}
-            onBlur={() => setAlcool(formatarNumero(alcool))}
-          />            
-        </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>               Etanol (R$):</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ex: 3.99"
+                  keyboardType="decimal-pad"
+                  value={alcool}
+                  onChangeText={setAlcool}
+                  onBlur={() => setAlcool(formatarNumero(alcool))}
+                />
+              </View>
 
-        <View style={styles.buttonContainer}>
-          <Button 
-            title='Calcular Melhor Opção' 
-            onPress={combustivelViavel}
-            color="#2c3e50"
-            disabled={!gasolina.trim() || !alcool.trim()}
-          />
-        </View>
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Calcular Melhor Opção"
+                  onPress={combustivelViavel}
+                  color="#2c3e50"
+                  disabled={!gasolina.trim() || !alcool.trim()}
+                />
+              </View>
 
-        {resposta ? (
-          <View style={[styles.resultadoContainer, resultadoStyle]}>
-            <Text style={styles.resultadoTexto}>{resposta}</Text>
-          </View>
-        ) : null}
-      </View>
-    </TouchableWithoutFeedback>
+              {resposta ? (
+                <View style={[styles.resultadoContainer, resultadoStyle]}>
+                  <Text style={styles.resultadoTexto}>{resposta}</Text>
+                </View>
+              ) : null}
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    resizeMode: 'cover', // garante que a imagem cubra toda a tela
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)'
+  },
+  imageStyle: {
+    width: 300,
+    height: 300,
+    opacity: 0.1,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 25,
+  },
+  inner: {
+    flex: 1,
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   titulo: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: 'red',
-    marginBottom: 1,
+    color: '#2c3e50',
+    marginBottom: 25,
   },
   subtitulo: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#7f8c8d',
   },
   inputContainer: {
-    marginBottom: 10,
+    marginBottom: 13,
   },
   label: {
-    fontSize: 23,
-    marginBottom: 5,
+    fontSize: 20,
     color: '#34495e',
-    
+    marginBottom: 5,
   },
   input: {
-    height: 60,
+    height: 50,
     borderWidth: 2,
-    borderColor: '#bdc3c7',
-    borderRadius: 20,
-    paddingHorizontal: 35,
-    marginHorizontal: 55,
-    fontSize: 26,
-    top: 3,
+    borderColor: '#ccc',
+    borderRadius: 22,
+    paddingHorizontal: 100,
+    fontSize: 18,
     backgroundColor: '#fff',
   },
   buttonContainer: {
-    marginTop: 20,
-    padding: 1,
+    marginTop: 10,
     marginBottom: 10,
-    borderRadius: 50,
+    borderRadius: 22,
     overflow: 'hidden',
   },
   resultadoContainer: {
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 10,
   },
   resultadoTexto: {
     fontSize: 18,
@@ -155,12 +182,12 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   resultadoNeutro: {
-    backgroundColor: '#ecf0f1',
+    backgroundColor: '#95a5a6',
   },
   resultadoAlcool: {
     backgroundColor: '#27ae60',
   },
   resultadoGasolina: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#c0392b',
   },
 });
