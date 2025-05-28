@@ -6,6 +6,7 @@ export default function App() {
   const [alcool, setAlcool] = useState('');
   const [resposta, setResposta] = useState('');
   const [resultadoStyle, setResultadoStyle] = useState(styles.resultadoNeutro);
+
   const formatarNumero = (valor) => {
   const valorLimpo = valor.replace(/[^0-9.,]/g, '');
     return valorLimpo.replace(',', '.');
@@ -48,11 +49,11 @@ export default function App() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.titulo}>Escolha de Combustível</Text>
-          <Text style={styles.subtitulo}>Compare os preços</Text>
+          <Text style={styles.subtitulo}>Compare os preços </Text>
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Gasolina (R$):</Text>          
+          <Text style={styles.label}>           Gasolina (R$):</Text>          
           <TextInput              
             style={styles.input}
             placeholder='Ex: 5.75'
@@ -64,7 +65,7 @@ export default function App() {
         </View>   
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Álcool (R$):</Text>          
+          <Text style={styles.label}>             Álcool (R$):</Text>          
           <TextInput              
             style={styles.input}
             placeholder='Ex: 3.99'
@@ -133,13 +134,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 55,
     fontSize: 26,
     top: 3,
-     
     backgroundColor: '#fff',
   },
   buttonContainer: {
     marginTop: 20,
-    padding: 5,
-    marginBottom: 30,
+    padding: 1,
+    marginBottom: 10,
     borderRadius: 50,
     overflow: 'hidden',
   },
