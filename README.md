@@ -1,0 +1,2 @@
+Uma calAplicativo para comparar preços de gasolina e álcool, funciona dividindo o preço do álcool pelo da gasolina. 
+Calcula uma porcentagem de 70%), para ver qual combustivel e mais vantajoso
