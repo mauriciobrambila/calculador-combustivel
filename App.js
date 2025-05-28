@@ -6,7 +6,6 @@ export default function App() {
   const [alcool, setAlcool] = useState('');
   const [resposta, setResposta] = useState('');
   const [resultadoStyle, setResultadoStyle] = useState(styles.resultadoNeutro);
-
   const formatarNumero = (valor) => {
   const valorLimpo = valor.replace(/[^0-9.,]/g, '');
     return valorLimpo.replace(',', '.');
