@@ -1,8 +1,8 @@
 {
   "name": "app-combustivel",
-  "version": "1.0.1",
+  "version": "1.0.7",
   "android": {
-    "versionCode": 3
+    "versionCode": 7
   },
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {

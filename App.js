@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, ImageBackground, TouchableWithoutFeedback, 
   Keyboard, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 
@@ -7,26 +7,48 @@ export default function App() {
   const [alcool, setAlcool] = useState('');
   const [resposta, setResposta] = useState('');
   const [resultadoStyle, setResultadoStyle] = useState(styles.resultadoNeutro);
-  const formatarNumero = (valor) => {
-  const valorLimpo = valor.replace(/[^0-9.,]/g, '');
 
-    return valorLimpo.replace(',', '.');
+  // Função para formatar o valor digitado (sem pontos decimais) para o formato monetário
+  const formatarValor = (valor) => {
+    // Remove tudo que não é dígito
+    const valorLimpo = valor.replace(/\D/g, '');
+    
+    // Se não tiver valor, retorna vazio
+    if (!valorLimpo) return '';
+    
+    // Converte para o formato decimal (os 2 últimos dígitos são os centavos)
+    const valorNumerico = parseFloat(valorLimpo) / 100;
+    
+    // Formata para string com 2 casas decimais e substitui . por ,
+    return valorNumerico.toFixed(2).replace('.', ',');
   };
 
+  // Função para converter o valor formatado (com vírgula) para número
+  const parseValor = (valor) => {
+    const valorLimpo = valor.replace(',', '.');
+    return parseFloat(valorLimpo) || 0;
+  };
+
+  // Efeito que calcula automaticamente quando os valores mudam
+  useEffect(() => {
+    if (gasolina && alcool) {
+      combustivelViavel();
+    } else if (gasolina || alcool) {
+      setResposta('Preencha ambos os valores');
+      setResultadoStyle(styles.resultadoNeutro);
+    } else {
+      setResposta('');
+    }
+  }, [gasolina, alcool]);
+
   function calculoCombustivel() {
-    const gasolinaNum = parseFloat(formatarNumero(gasolina)) || 0;
-    const alcoolNum = parseFloat(formatarNumero(alcool)) || 0;
+    const gasolinaNum = parseValor(gasolina);
+    const alcoolNum = parseValor(alcool);
     if (gasolinaNum === 0) return Infinity;
     return alcoolNum / gasolinaNum;
   }
 
   function combustivelViavel() {
-    if (!gasolina.trim() || !alcool.trim()) {
-      setResposta('Preencha ambos os valores');
-      setResultadoStyle(styles.resultadoNeutro);
-      return;
-    }
-
     const resultado = calculoCombustivel();
 
     if (isNaN(resultado)) {
@@ -66,11 +88,10 @@ export default function App() {
                 <Text style={styles.label}>             Gasolina (R$):</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex: 5.75"
-                  keyboardType="decimal-pad"
+                  placeholder="Ex: 579 para 5,79"
+                  keyboardType="numeric"
                   value={gasolina}
-                  onChangeText={setGasolina}
-                  onBlur={() => setGasolina(formatarNumero(gasolina))}
+                  onChangeText={(text) => setGasolina(formatarValor(text))}
                 />
               </View>
 
@@ -78,20 +99,10 @@ export default function App() {
                 <Text style={styles.label}>               Etanol (R$):</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex: 3.99"
-                  keyboardType="decimal-pad"
+                  placeholder="Ex: 399 para 3,99"
+                  keyboardType="numeric"
                   value={alcool}
-                  onChangeText={setAlcool}
-                  onBlur={() => setAlcool(formatarNumero(alcool))}
-                />
-              </View>
-
-              <View style={styles.buttonContainer}>
-                <Button
-                  title="Calcular Melhor Opção"
-                  onPress={combustivelViavel}
-                  color="#2c3e50"
-                  disabled={!gasolina.trim() || !alcool.trim()}
+                  onChangeText={(text) => setAlcool(formatarValor(text))}
                 />
               </View>
 
@@ -111,7 +122,7 @@ export default function App() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover', // garante que a imagem cubra toda a tela
+    resizeMode: 'cover',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.9)'
