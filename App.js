@@ -1,43 +1,46 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, ImageBackground, TouchableWithoutFeedback, 
-  Keyboard, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { useState, useEffect, useRef } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ImageBackground,
+  Animated,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function App() {
-  const [gasolina, setGasolina] = useState('');
-  const [alcool, setAlcool] = useState('');
-  const [resposta, setResposta] = useState('');
+  const [gasolina, setGasolina] = useState("");
+  const [alcool, setAlcool] = useState("");
+  const [resposta, setResposta] = useState("");
   const [resultadoStyle, setResultadoStyle] = useState(styles.resultadoNeutro);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Função para formatar o valor digitado (sem pontos decimais) para o formato monetário
   const formatarValor = (valor) => {
-    // Remove tudo que não é dígito
-    const valorLimpo = valor.replace(/\D/g, '');
-    
-    // Se não tiver valor, retorna vazio
-    if (!valorLimpo) return '';
-    
-    // Converte para o formato decimal (os 2 últimos dígitos são os centavos)
+    const valorLimpo = valor.replace(/\D/g, "");
+    if (!valorLimpo) return "";
     const valorNumerico = parseFloat(valorLimpo) / 100;
-    
-    // Formata para string com 2 casas decimais e substitui . por ,
-    return valorNumerico.toFixed(2).replace('.', ',');
+    return valorNumerico.toFixed(2).replace(".", ",");
   };
 
-  // Função para converter o valor formatado (com vírgula) para número
   const parseValor = (valor) => {
-    const valorLimpo = valor.replace(',', '.');
+    const valorLimpo = valor.replace(",", ".");
     return parseFloat(valorLimpo) || 0;
   };
 
-  // Efeito que calcula automaticamente quando os valores mudam
   useEffect(() => {
     if (gasolina && alcool) {
       combustivelViavel();
     } else if (gasolina || alcool) {
-      setResposta('Preencha ambos os valores');
+      setResposta("Preencha ambos os valores");
       setResultadoStyle(styles.resultadoNeutro);
     } else {
-      setResposta('');
+      setResposta("");
     }
   }, [gasolina, alcool]);
 
@@ -52,153 +55,191 @@ export default function App() {
     const resultado = calculoCombustivel();
 
     if (isNaN(resultado)) {
-      setResposta('Valores inválidos');
+      setResposta("Valores inválidos");
       setResultadoStyle(styles.resultadoNeutro);
       return;
     }
 
     if (resultado <= 0.7) {
-      setResposta('Abasteça com álcool');
+      setResposta("💧 Abasteça com Etanol");
       setResultadoStyle(styles.resultadoAlcool);
     } else {
-      setResposta('Abasteça com gasolina');
+      setResposta("⛽Abasteça com Gasolina");
       setResultadoStyle(styles.resultadoGasolina);
     }
+
+    fadeAnim.setValue(0);
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
   }
 
   return (
-    <ImageBackground
-      source={require('./img/posto.jpg')}
-      style={styles.background}
-      imageStyle={{ opacity: 0.6 }}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <LinearGradient
+        colors={["#1a2a6c", "#b21f1f", "#fdbb2d"]}
+        style={styles.container}
+      >
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={80}
         >
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={styles.inner}>
-              <View style={styles.header}>
-                <Text style={styles.titulo}>Escolha de Combustível </Text>
-                <Text style={styles.subtitulo}>Compare os preços  </Text>
-              </View>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.card}>
+              <ImageBackground
+                source={require("./img/posto.jpg")}
+                style={styles.image}
+                imageStyle={{ opacity: 0.95, borderRadius: 60 }}
+              >
+                <View style={styles.overlay}>
+                  <Text style={styles.titulo}>Calculadora de  Combustível</Text>
+                  <Text style={styles.subtitulo}>
+                    Compare preços, economize e escolha seu posto.
+                  </Text>
+                </View>
+              </ImageBackground>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>             Gasolina (R$):</Text>
+                <Text style={styles.label}>             Gasolina (R$)</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex: 579 para 5,79"
+                  placeholder="     Digite só números"
+                  placeholderTextColor="#888"
                   keyboardType="numeric"
                   value={gasolina}
-                  onChangeText={(text) => setGasolina(formatarValor(text))}
+                  onChangeText={(t) => setGasolina(formatarValor(t))}
                 />
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>               Etanol (R$):</Text>
+                <Text style={styles.label}>               Etanol (R$)</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Ex: 399 para 3,99"
+                  placeholder="    Digite só números"
+                  placeholderTextColor="#888"
                   keyboardType="numeric"
                   value={alcool}
-                  onChangeText={(text) => setAlcool(formatarValor(text))}
+                  onChangeText={(t) => setAlcool(formatarValor(t))}
                 />
               </View>
 
               {resposta ? (
-                <View style={[styles.resultadoContainer, resultadoStyle]}>
+                <Animated.View
+                  style={[
+                    styles.resultadoContainer,
+                    resultadoStyle,
+                    { opacity: fadeAnim },
+                  ]}
+                >
                   <Text style={styles.resultadoTexto}>{resposta}</Text>
-                </View>
+                </Animated.View>
               ) : null}
             </View>
+
+            <Text style={styles.creditos}>           🚗 Desenvolvido por mauriciobrambila2015@gmail.com</Text>
           </ScrollView>
         </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </ImageBackground>
+      </LinearGradient>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  container: {
     flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)'
-  },
-  imageStyle: {
-    width: 300,
-    height: 300,
-    opacity: 0.1,
-    resizeMode: 'contain',
-    alignSelf: 'center',
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 16,
   },
-  inner: {
-    flex: 1,
-    justifyContent: 'center',
+  card: {
+    backgroundColor: "#fff",
+    width: "100%",
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 10,
   },
-  header: {
-    alignItems: 'center',
+  image: {
+    width: "100%",
+    height: 160,
+    justifyContent: "flex-end",
     marginBottom: 10,
+  },
+  overlay: {
+    backgroundColor: "rgba(0,0,0,0.20)",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    padding: 12,
   },
   titulo: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 25,
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
   },
   subtitulo: {
-    fontSize: 18,
-    color: '#7f8c8d',
+    fontSize: 16,
+    color: "#f5f5f5",
+    textAlign: "center",
+    marginTop: 4,
   },
   inputContainer: {
-    marginBottom: 13,
+    marginBottom: 15,
   },
   label: {
-    fontSize: 20,
-    color: '#34495e',
-    marginBottom: 5,
+    fontSize: 17,
+    color: "#2c3e50",
+    marginBottom: 6,
+    fontWeight: "800",
   },
   input: {
-    height: 50,
-    borderWidth: 2,
-    borderColor: '#ccc',
-    borderRadius: 22,
-    paddingHorizontal: 100,
+    height: 55,
+    borderWidth: 2.5,
+    borderColor: "blue",
+    borderRadius: 16,
+    paddingHorizontal: 28,
     fontSize: 18,
-    backgroundColor: '#fff',
-  },
-  buttonContainer: {
-    marginTop: 10,
-    marginBottom: 10,
-    borderRadius: 22,
-    overflow: 'hidden',
+    backgroundColor: "#f9f9f9",
+    color: "#333",
   },
   resultadoContainer: {
+    marginTop:14,
+    borderRadius: 18,
     padding: 10,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   resultadoTexto: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
   resultadoNeutro: {
-    backgroundColor: '#95a5a6',
+    backgroundColor: "#7f8c8d",
   },
   resultadoAlcool: {
-    backgroundColor: '#27ae60',
+    backgroundColor: "green",
   },
   resultadoGasolina: {
-    backgroundColor: '#c0392b',
+    backgroundColor: "red",
+  },
+  creditos: {
+    fontSize: 14,
+    color: "#fff",
+    marginTop: 22,
+    opacity: 0.6,
   },
 });

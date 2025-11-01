@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 16.3.1",
+    "version": ">= 16.12.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -9,16 +9,20 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
+      "autoIncrement": true,
       "android": {
-        "buildType": "app-bundle"  
-      },
-      "autoIncrement": true
+        "gradleCommand": ":app:bundleRelease -Pandroid.native.linkerFlags=-Wl,--max-page-size=16384"
+      }
     }
   },
   "submit": {
     "production": {}
   }
 }
+
